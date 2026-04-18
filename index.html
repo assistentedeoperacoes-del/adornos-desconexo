@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adornos Desconexo — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh;padding:24px 28px}
+h1{font-size:22px;font-weight:600}
+.sub{font-size:13px;color:#5f5e5a;margin-top:3px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:500;border:1px solid #d3d1c7;background:#fff;color:#1a1a18;transition:background .15s}
+.btn:hover{background:#ede9e3}
+.btnp{background:#E6F1FB;color:#0C447C;border-color:#378ADD}
+.btnp:hover{background:#B5D4F4}
+.btnsec{background:#f1efe8;color:#444441}
+.btnsec.active{background:#EEEDFE;color:#3C3489;border-color:#7F77DD}
+/* SEARCH */
+.sb{background:#fff;border:1px solid #d3d1c7;border-radius:12px;padding:16px 20px;margin-bottom:16px}
+.sb-ttl{font-size:11px;font-weight:600;color:#5f5e5a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.sg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:12px}
+.sf label{display:block;font-size:11px;color:#5f5e5a;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.sf-w{position:relative}
+.sf-w input{width:100%;font-size:13px;padding:9px 10px 9px 32px;border:1px solid #d3d1c7;border-radius:8px;background:#f5f4f0;color:#1a1a18;outline:none;transition:border-color .15s}
+.sf-w input:focus{border-color:#378ADD;background:#fff}
+.sf-ico{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#888780;pointer-events:none}
+.sf select{width:100%;font-size:13px;padding:9px 10px;border:1px solid #d3d1c7;border-radius:8px;background:#f5f4f0;color:#1a1a18;outline:none}
+.sf select:focus{border-color:#378ADD;background:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:4px 11px;border-radius:99px;background:#E6F1FB;color:#0C447C;cursor:pointer}
+.chip:hover{opacity:.75}
+.chip-clr{background:#f1efe8;color:#5f5e5a;border:1px solid #d3d1c7}
+/* KPIs */
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.kp{background:#f1efe8;border-radius:10px;padding:15px 17px}
+.kp.ka{background:#fff;border:1px solid #d3d1c7}
+.kl{font-size:11px;color:#5f5e5a;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:7px}
+.kv{font-size:22px;font-weight:700;line-height:1}
+.ks{font-size:12px;color:#5f5e5a;margin-top:5px}
+/* CHARTS */
+.cr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.pn{background:#fff;border:1px solid #d3d1c7;border-radius:12px;padding:16px 20px}
+.pn h3{font-size:11px;font-weight:600;color:#5f5e5a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.leg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.leg span{display:flex;align-items:center;gap:5px;font-size:11px;color:#5f5e5a}
+.sq{width:8px;height:8px;border-radius:2px;flex-shrink:0;display:inline-block}
+/* PANEL */
+.tp{background:#fff;border:1px solid #d3d1c7;border-radius:12px;padding:16px 20px}
+.ttb{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.tl{font-size:11px;font-weight:600;color:#5f5e5a;text-transform:uppercase;letter-spacing:.06em}
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th{font-size:11px;font-weight:600;color:#5f5e5a;text-align:left;padding:9px 10px;border-bottom:1.5px solid #e8e6e0;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #f1efe8;color:#1a1a18;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.dr:hover td{background:#fafaf7}
+.tcell-img{width:44px;height:44px;border-radius:8px;overflow:hidden;background:#f1efe8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.tcell-img img{width:44px;height:44px;object-fit:cover;display:block}
+.tcell-init{font-size:13px;font-weight:700;color:#b4b2a9}
+/* GRID */
+.grid-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.card{background:#fff;border:1px solid #d3d1c7;border-radius:12px;overflow:hidden;transition:border-color .15s,transform .1s}
+.card:hover{border-color:#b4b2a9;transform:translateY(-2px)}
+.card-img{width:100%;height:165px;background:#f1efe8;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.card-img img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.card-img .fb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.card-img .fb-txt{font-size:36px;font-weight:800;opacity:.18}
+.sbadge{position:absolute;top:8px;right:8px}
+.cl-badge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.03em;backdrop-filter:blur(2px)}
+.cl-garimpo{background:rgba(26,26,24,0.72);color:#f5f4f0}
+.cl-acervo{background:rgba(14,68,124,0.88);color:#E6F1FB}
+.cl-acervo-d{background:rgba(15,110,86,0.88);color:#E1F5EE}
+.card-body{padding:12px 14px}
+.card-name{font-size:13px;font-weight:600;line-height:1.35;margin-bottom:3px}
+.card-meta{font-size:11px;color:#888780;margin-bottom:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.card-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.card-price{font-size:15px;font-weight:700}
+.card-mg{font-size:12px;font-weight:600}
+.card-acts{display:flex;gap:4px;margin-top:10px;border-top:1px solid #f1efe8;padding-top:10px}
+.card-acts button{flex:1;font-size:12px;padding:6px 4px;border-radius:6px;cursor:pointer;border:1px solid #d3d1c7;background:#f5f4f0;color:#1a1a18;transition:background .15s}
+.card-acts button:hover{background:#ede9e3}
+.card-acts .del:hover{background:#FCEBEB;color:#A32D2D;border-color:#F09595}
+/* pills */
+.pi{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px}
+.p-a{background:#EEEDFE;color:#3C3489}.p-b{background:#E6F1FB;color:#0C447C}
+.p-c{background:#FAEEDA;color:#633806}.p-u{background:#E1F5EE;color:#085041}
+.p-m{background:#FBEAF0;color:#72243E}.p-q{background:#FAECE7;color:#993C1D}
+.p-o{background:#F1EFE8;color:#444441}.p-bio{background:#EEEDFE;color:#26215C}
+.p-cap{background:#FBEAF0;color:#4B1528}
+.p-disp{background:#EAF3DE;color:#3B6D11}.p-vend{background:#E6F1FB;color:#0C447C}
+.p-blo{background:#FCEBEB;color:#A32D2D}.p-nid{background:#FAEEDA;color:#633806}
+.bw{display:flex;align-items:center;gap:5px}
+.bb{flex:1;height:5px;border-radius:3px;background:#e8e6e0;overflow:hidden}
+.bf{height:100%;border-radius:3px}
+.ib{background:none;border:none;cursor:pointer;color:#888780;padding:5px 6px;border-radius:6px;line-height:1;transition:background .15s}
+.ib:hover{background:#f1efe8;color:#1a1a18}
+.ib.dd:hover{background:#FCEBEB;color:#A32D2D}
+.ft{display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:8px}
+.fi{font-size:12px;color:#5f5e5a}
+.pgr{display:flex;gap:6px;align-items:center}
+.pgr button{font-size:12px;padding:6px 12px;border:1px solid #d3d1c7;border-radius:8px;background:#f1efe8;cursor:pointer;color:#1a1a18;transition:background .15s}
+.pgr button:hover:not(:disabled){background:#e0deda}
+.pgr button:disabled{opacity:.35;cursor:default}
+.pgl{font-size:12px;color:#5f5e5a;min-width:52px;text-align:center}
+.emp{text-align:center;padding:2.5rem;color:#888780;font-size:13px}
+/* LIGHTBOX */
+.lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;cursor:zoom-out}
+.lb.on{display:flex}
+.lb-inner{max-width:90vw;max-height:88vh;position:relative}
+.lb-inner img{max-width:90vw;max-height:84vh;border-radius:10px;object-fit:contain;display:block;cursor:default}
+.lb-close{position:fixed;top:18px;right:22px;font-size:30px;color:#fff;cursor:pointer;background:none;border:none;opacity:.8;line-height:1}
+.lb-close:hover{opacity:1}
+.lb-cap{font-size:13px;color:rgba(255,255,255,.75);text-align:center;margin-top:10px;max-width:90vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.ov.on{display:flex}
+.mo{background:#fff;border:1px solid #d3d1c7;border-radius:14px;padding:24px;width:400px;max-width:94vw;margin-bottom:40px}
+.mo h2{font-size:17px;font-weight:600;margin-bottom:14px}
+.mf{margin-bottom:11px}
+.mf label{display:block;font-size:12px;color:#5f5e5a;margin-bottom:4px;font-weight:500}
+.mf input,.mf select{width:100%;font-size:13px;padding:9px 11px;border:1px solid #d3d1c7;border-radius:8px;background:#fff;color:#1a1a18;outline:none;transition:border-color .15s}
+.mf input:focus,.mf select:focus{border-color:#378ADD}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mft{display:flex;gap:8px;margin-top:16px}
+.mft button{flex:1;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid #d3d1c7;font-weight:500;transition:background .15s}
+.ms{background:#E6F1FB;color:#0C447C;border-color:#378ADD}.ms:hover{background:#B5D4F4}
+.mc{background:#f1efe8;color:#5f5e5a}.mc:hover{background:#e0deda}
+.nota{font-size:12px;color:#888780;background:#f5f4f0;border-radius:6px;padding:8px 10px;margin-bottom:12px}
+.img-tip{font-size:11px;color:#888780;margin-top:4px;padding:0 2px}
+@media(max-width:700px){.sg{grid-template-columns:1fr}.cr{grid-template-columns:1fr}.grid-wrap{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Adornos Desconexo</h1>
+    <p class="sub" id="subDate">Garimpo Desconexo &amp; Acervo do Curador</p>
+  </div>
+  <div class="hbtns">
+    <button class="btn" onclick="exportCSV()">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1v9M5 7l3 3 3-3M2 12v1a2 2 0 002 2h8a2 2 0 002-2v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Exportar CSV
+    </button>
+    <button class="btn btnp" onclick="openModal()">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Novo produto
+    </button>
+  </div>
+</div>
+
+<div class="sb">
+  <div class="sb-ttl">Buscar e filtrar estoque</div>
+  <div class="sg">
+    <div class="sf">
+      <label>Produto</label>
+      <div class="sf-w">
+        <svg class="sf-ico" width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input type="text" id="sP" placeholder="Nome, código ou artesão..." oninput="chips();go()">
+      </div>
+    </div>
+    <div class="sf">
+      <label>Categoria</label>
+      <select id="sC" onchange="chips();go()">
+        <option value="">Todas as categorias</option>
+        <option>ADORNO</option><option>BANCO</option><option>BAU</option><option>BIOMBO</option>
+        <option>CADEIRA</option><option>CAPA DE ALMOFADA</option><option>MALA</option>
+        <option>QUADRO</option><option>VASO</option><option>LUMINÁRIA</option><option>LIVRO</option><option>COMPLEMENTOS</option><option>OUTROS</option>
+      </select>
+    </div>
+    <div class="sf">
+      <label>Status</label>
+      <select id="sSt" onchange="chips();go()">
+        <option value="">Todos os status</option>
+        <option>Disponível</option><option>Vendido</option>
+        <option>Bloqueado</option><option>Consignado</option><option>Não identificado</option>
+      </select>
+    </div>
+    <div class="sf">
+      <label>Armazém</label>
+      <select id="sArm" onchange="chips();go()">
+        <option value="">Todos os armazéns</option>
+        <option>Loja Desconexo</option>
+        <option>HUB NB</option>
+        <option>Serrinha</option>
+        <option>Consignado</option>
+      </select>
+    </div>
+    <div class="sf">
+      <label>Classificação</label>
+      <select id="sCl" onchange="chips();go()">
+        <option value="">Todas</option>
+        <option>GARIMPO DESCONEXO</option>
+        <option>ACERVO DO CURADOR</option>
+        <option>ACERVO DESCONEXO</option>
+      </select>
+    </div>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<div class="kg" id="kg"></div>
+
+<div class="cr">
+  <div class="pn">
+    <h3>Valor est. por categoria</h3>
+    <div class="leg" id="catL"></div>
+    <div style="position:relative;height:200px"><canvas id="cCat" role="img" aria-label="Valor de venda por categoria"></canvas></div>
+  </div>
+  <div class="pn">
+    <h3>Status do estoque</h3>
+    <div class="leg" id="sttL"></div>
+    <div style="position:relative;height:200px"><canvas id="cStt" role="img" aria-label="Status do estoque"></canvas></div>
+  </div>
+  <div class="pn">
+    <h3>Classificação</h3>
+    <div class="leg" id="clsL"></div>
+    <div style="position:relative;height:200px"><canvas id="cCls" role="img" aria-label="Classificação Garimpo vs Acervo"></canvas></div>
+  </div>
+</div>
+
+<div class="tp">
+  <div class="ttb">
+    <span class="tl" id="cnt">—</span>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:4px">
+        <button class="btn btnsec" id="btnTable" onclick="setView('table')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="3" rx="1" fill="currentColor"/><rect x="1" y="7" width="14" height="3" rx="1" fill="currentColor"/><rect x="1" y="12" width="14" height="2" rx="1" fill="currentColor"/></svg>
+          Lista
+        </button>
+        <button class="btn btnsec active" id="btnGrid" onclick="setView('grid')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"/></svg>
+          Grade
+        </button>
+      </div>
+      <select id="srt" onchange="go()">
+        <option value="nome">Ordenar: nome A-Z</option>
+        <option value="margem">Ordenar: maior margem</option>
+        <option value="venda">Ordenar: maior venda</option>
+        <option value="custo">Ordenar: maior custo</option>
+        <option value="qtd">Ordenar: quantidade</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="tableView" style="display:none">
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th style="width:52px"></th>
+          <th style="width:27%">Produto</th>
+          <th style="width:9%">Categ.</th>
+          <th style="width:10%">Classif.</th>
+          <th style="width:5%;text-align:center">Qtd</th>
+          <th style="width:11%;text-align:right">Custo</th>
+          <th style="width:11%;text-align:right">Venda</th>
+          <th style="width:9%">Margem</th>
+          <th style="width:9%">Status</th>
+          <th style="width:4%"></th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="gridView">
+    <div class="grid-wrap" id="gridBody"></div>
+  </div>
+
+  <div class="ft">
+    <span class="fi" id="pgI"></span>
+    <div class="pgr">
+      <button id="pB" onclick="pgC(-1)" disabled>&#8249; Anterior</button>
+      <span class="pgl" id="pgL"></span>
+      <button id="nB" onclick="pgC(1)">Próxima &#8250;</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb" onclick="closeLB()">
+  <button class="lb-close" onclick="event.stopPropagation();closeLB()">&#x2715;</button>
+  <div class="lb-inner" onclick="event.stopPropagation()">
+    <img id="lbImg" src="" alt="">
+    <div class="lb-cap" id="lbCap"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="ov">
+  <div class="mo">
+    <h2 id="mT">Novo produto</h2>
+    <p class="nota">Campos com custo ou venda zerados indicam valor a confirmar com o artesão.</p>
+    <div class="mf"><label>Nome do produto *</label><input id="fN" type="text" placeholder="Ex: Lamparina grande — Françuli Aviões"></div>
+    <div class="fr2">
+      <div class="mf"><label>Código Monday</label><input id="fCo" type="text" placeholder="163xxx"></div>
+      <div class="mf"><label>Categoria</label>
+        <select id="fCt">
+          <option>ADORNO</option><option>BANCO</option><option>BAU</option><option>BIOMBO</option>
+          <option>CADEIRA</option><option>CAPA DE ALMOFADA</option><option>MALA</option>
+          <option>QUADRO</option><option>OUTROS</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr2">
+      <div class="mf"><label>Quantidade</label><input id="fQ" type="number" min="0" value="1"></div>
+      <div class="mf"><label>Armazém</label>
+        <select id="fAr"><option>Loja Desconexo</option><option>HUB NB</option><option>Serrinha</option><option>Consignado</option></select>
+      </div>
+    </div>
+    <div class="fr2">
+      <div class="mf"><label>Status</label>
+        <select id="fSt"><option>Disponível</option><option>Vendido</option><option>Bloqueado</option><option>Consignado</option><option>Não identificado</option></select>
+      </div>
+      <div class="mf"><label>Classificação</label>
+        <select id="fCl"><option>GARIMPO DESCONEXO</option><option>ACERVO DO CURADOR</option><option>ACERVO DESCONEXO</option></select>
+      </div>
+    </div>
+    <div class="fr2">
+      <div class="mf"><label>Custo unitário (R$)</label><input id="fCu" type="number" min="0" step="1" placeholder="0"></div>
+      <div class="mf"><label>Valor de venda (R$)</label><input id="fVe" type="number" min="0" step="1" placeholder="0"></div>
+    </div>
+    <div class="mf">
+      <label>URL da foto</label>
+      <input id="fImg" type="text" placeholder="https://...">
+      <p class="img-tip">Cole a URL do Monday.com ou de qualquer imagem pública</p>
+    </div>
+    <input type="hidden" id="fIx" value="-1">
+    <div class="mft">
+      <button class="mc" onclick="closeM()">Cancelar</button>
+      <button class="ms" onclick="save()">Salvar produto</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var PRODS = [{"nome": "BANCO BAIXO - ANDRE SELEIRO", "cod": "163522", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 400.0, "ve": 2500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899257974/BANCO ANDRE SELEIRO .png"}, {"nome": "BAÚ - ANDRE SELEIRO", "cod": "163528", "cat": "BAU", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 2500.0, "ve": 5500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899260478/BAU ANDRE SELEIRO.png"}, {"nome": "CADEIRA EBANIZADA COM ASSENTO DE COURO - ANDRE SELEIRO", "cod": "163521", "cat": "CADEIRA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 500.0, "ve": 2500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899262200/CADEIRA ANDRE SELEIRO.png"}, {"nome": "BONÉ DO JOÃO GOMES - ANDRE SELEIRO", "cod": "163527", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 180.0, "ve": 750.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899265118/BONÉ JOÃO GOMES.png"}, {"nome": "MALA PEQUENA DE COURO - ANDRÉ SELEIRO", "cod": "163526", "cat": "MALA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 95.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899272981/MALA PEQUENA.png"}, {"nome": "MALA GRANDE DE COURO - ANDRE SELEIRO", "cod": "163525", "cat": "MALA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 150.0, "ve": 950.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899310872/MALA GRANDE.png"}, {"nome": "BANCO ALTO - ANDRE SELEIRO", "cod": "163524", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 700.0, "ve": 1500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899318442/BANCO ALTO - ANDRE SELEIRO.png"}, {"nome": "BANCO MÉDIO  - ANDRÉ SELEIRO", "cod": "163523", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 560.0, "ve": 1800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899331998/BANCO ANDRE SELEIRO .png"}, {"nome": "CADEIRA DE BALANÇO MACARRÃO AZUL", "cod": "163520", "cat": "CADEIRA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 700.0, "ve": 2500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899336440/CADEIRA DE BALANÇO.png"}, {"nome": "CACHOS GOIABA - MESTRE DIM ALVES", "cod": "163533", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 4, "arm": "Loja Desconexo", "st": "Disponível", "cu": 150.0, "ve": 250.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899342059/CACHOS DE GOIABA .png"}, {"nome": "CAJU - MESTRE DIM ALVES", "cod": "163532", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 15, "arm": "Loja Desconexo", "st": "Disponível", "cu": 50.0, "ve": 80.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899346924/CAJU - DIM ALVES.png"}, {"nome": "CORDA -  MESTRE DIM ALVES", "cod": "163534", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 2000.0, "ve": 4000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899354921/CORDA DIM ALVES.png"}, {"nome": "SOLDADINHO (PASSARO) - CORRINHA", "cod": "163538", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 350.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899359228/PASSARO - CORRINHA.png"}, {"nome": "SUPORTE PARA SOLDADINHO (PASSARO) - CORRINHA", "cod": "163539", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 200.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899363234/SUPORTE PASSARO - CORRINHA.png"}, {"nome": "QUADRO PROFISSÕES - LUTA |  - artesãos AMILTON E CLEMILTON", "cod": "163890", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 400.0, "ve": 950.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899372420/QUADRO -  AMILTON E CLEMILTON.png"}, {"nome": "QUADRO PROFISSÕES - FOTÓGRAFO | artesãos AMILTON E CLEMILTON", "cod": "163891", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 400.0, "ve": 950.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899377572/QUADRO PROFISSOES.png"}, {"nome": "QUADRO PROFISSÕES - MULHER COM BOLSA | artesãos AMILTON E CLEMILTON", "cod": "163892", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 400.0, "ve": 950.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899384749/QUADRO MULHER.png"}, {"nome": "QUADRO PROFISSÕES - MENINO NO BALCÃO | artesãos AMILTON E CLEMILTON", "cod": "163895", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 400.0, "ve": 950.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899403838/QUADRO MENINO.png"}, {"nome": "QUADRO PROFISSÕES - MENINO COM CACHORRO | artesãos AMILTON E CLEMILTON", "cod": "163894", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 400.0, "ve": 950.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899414115/QUADRO MENINO COM CACHORRO.png"}, {"nome": "JANELA AZUL | artesãos AMILTON E CLEMILTON", "cod": "163545", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1600.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899420173/JANELA AZUL.png"}, {"nome": "JANELA AMARELA | artesãos AMILTON E CLEMILTON", "cod": "163546", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1600.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899425214/JANELA AMARELA.png"}, {"nome": "PLACA 2 RETANGULAR  | artesãos AMILTON E CLEMILTON", "cod": "163548", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 800.0, "ve": 1200.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899431480/PLACA 2 .png"}, {"nome": "PLACA 1 CIRCULAR | artesãos AMILTON E CLEMILTON", "cod": "163547", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 600.0, "ve": 1500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899435732/PLACA 1.png"}, {"nome": "LAMPARINA GRANDE - FRANÇULI AVIÕES", "cod": "163564", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 4, "arm": "Loja Desconexo", "st": "Disponível", "cu": 65.0, "ve": 150.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899439856/LAMPARINA GRANDE.png"}, {"nome": "LAMPARINA MEDIA - FRANÇULI AVIÕES", "cod": "163565", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 12, "arm": "Loja Desconexo", "st": "Disponível", "cu": 45.0, "ve": 150.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899443161/LAMPARINA MEDIA.png"}, {"nome": "AVIÃO - FRANÇULI AVIÕES", "cod": "163568", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 80.0, "ve": 250.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899453332/AVIÃO.png"}, {"nome": "GARRAFA AREIAS COLORIDAS - COQUEIROS - AVANY", "cod": "163403", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 5, "arm": "Loja Desconexo", "st": "Disponível", "cu": 130.0, "ve": 350.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899723761/GARRAFA COQUEIRO.jpg"}, {"nome": "GARRAFA AREIAS COLORIDAS - IGREJAS - AVANY", "cod": "163404", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 5, "arm": "Loja Desconexo", "st": "Disponível", "cu": 130.0, "ve": 350.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899730000/e20c4eac-f8ce-4988-a986-e1dd7b8dd629.jpg"}, {"nome": "GARRAFA AREIAS COLORIDAS - CASINHA - AVANY", "cod": "163405", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 5, "arm": "Loja Desconexo", "st": "Disponível", "cu": 130.0, "ve": 350.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899745212/CASINHA.jpg"}, {"nome": "QUADRO DJANGO - JOSÉ GONÇALVES", "cod": "163784", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899777843/QUADRO DJANGO.png"}, {"nome": "QUADRO LADY GAGA - JOSÉ GONÇALVES", "cod": "163785", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899794527/LADY GAGA.png"}, {"nome": "QUADRO BAD BUNNY - JOSÉ GONÇALVES", "cod": "163786", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899817346/BAD BUNNY.png"}, {"nome": "QUADRO PRINCESA DIANA  - JOSÉ GONÇALVES", "cod": "163787", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899822183/PRINCESA DIANA.png"}, {"nome": "QUADRO CELINE DION  - JOSÉ GONÇALVES", "cod": "163788", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899830153/CELINE DION.png"}, {"nome": "QUADRO SILVIO SANTOS   - JOSÉ GONÇALVES", "cod": "163789", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899838417/SILVIO SANTOS.png"}, {"nome": "QUADRO MARIA BETANIA    - JOSÉ GONÇALVES", "cod": "163790", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899849659/MARIA BETANIA.png"}, {"nome": "QUADRO BELCHIOR - JOSÉ GONÇALVES", "cod": "163791", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899863849/BELCHIOR.png"}, {"nome": "QUADRO GLÓRIA PIRES   - JOSÉ GONÇALVES", "cod": "163792", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899882541/GLORIA PIRES.png"}, {"nome": "QUADRO SÃO FRANCISCO - JOSÉ GONÇALVES", "cod": "163793", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899908453/SÃO FRANCISCO.png"}, {"nome": "QUADRO BRUNA MARQUEZINE  - JOSÉ GONÇALVES", "cod": "163794", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899917740/BRUNA MARQUEZINE.png"}, {"nome": "QUADRO GAL TROPICAL - JOSÉ GONÇALVEZ", "cod": "163795", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899920717/GAL TROPICAL.png"}, {"nome": "QUADRO ELVIS PRESLEY - JOSÉ GONÇALVEZ", "cod": "163796", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899925258/ELVIS .png"}, {"nome": "QUADRO MADONNA - JOSÉ GONÇALVES", "cod": "163797", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899928491/MADONNA.png"}, {"nome": "QUADRO BRUCE LEE - JOSÉ GONÇALVES", "cod": "163798", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899932700/BRUCE LEE.png"}, {"nome": "QUADRO ROBERTO CARLOS - JOSÉ GONÇALVES", "cod": "163799", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899940025/ROBERTO CARLOS.png"}, {"nome": "QUADRO PRINCESA DIANA - JOSÉ GONÇALVES", "cod": "163787", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899946418/PRINCESA DIANA.png"}, {"nome": "QUADRO MÃE DE PELÉ - JOSÉ GONÇALVES", "cod": "163800", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2899986650/MÃE DE PELE.png"}, {"nome": "QUADRO TRIBUTO AO REI PELÉ - JOSÉ GONÇALVES", "cod": "163801", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900386299/REI PELE .png"}, {"nome": "QUADRO FÁBIO JUNIOR - JOSÉ GONÇALVES", "cod": "163802", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900392236/FABIO LIMA.png"}, {"nome": "QUADRO AMADO BATISTA - JOSÉ GONÇALVES", "cod": "163803", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900398502/AMADO BATISTA.png"}, {"nome": "QUADRO TIM MAIA - JOSÉ GONÇALVES", "cod": "163804", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900402843/TIM MAIA.png"}, {"nome": "QUADRO RAINHA MARTA - JOSÉ GONÇALVES", "cod": "163805", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900407485/RAINHA MARTA.png"}, {"nome": "QUADRO WHITNEY HOUSTON - JOSÉ GONÇALVES", "cod": "163806", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900411148/WHITNEY.png"}, {"nome": "3 quadros | MULHERES BONITAS E FAMOSAS - JOSÉ GONÇALVES", "cod": "163807", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900415199/MULHERES FAMOSAS.png"}, {"nome": "QUADRO SÃO SEBASTIÃO - JOSÉ GONÇALVES", "cod": "163808", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900419423/SÃO SEBASTIÃO.png"}, {"nome": "3 quadros | a vida diaria do sertANEJO - JOSÉ GONÇALVES", "cod": "163809", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900423496/A VIDA DIARIA.png"}, {"nome": "QUADRO A LENDA DO PEIXE CAMURUPIM - JOSÉ GONÇALVES", "cod": "163810", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900426399/A LENDA.png"}, {"nome": "QUADRO A LENDA DO LOBISOMEM - JOSÉ GONÇALVES", "cod": "163811", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900429260/A LENDA DO LOBSOMEN.png"}, {"nome": "QUADRO ROBERTO CARVALHO E RITA LEE - JOSÉ GONÇALVES", "cod": "163812", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 233.0, "ve": 800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900434240/ROBERTO CARLOS E RITA LEE.png"}, {"nome": "JANELA - DEDÉ", "cod": "163637", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 500.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900438507/JANELA DEDE.png"}, {"nome": "BANCO QUADRADO - L: 40 X P:40 X A:47 CM  - ESPEDITO SELEIRO", "cod": "163438", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 980.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900444281/BANCO QUADRADO.png"}, {"nome": "BANCO RETANGULAR - L: 61 X P:36 X A:47 CM  - ESPEDITO SELEIRO", "cod": "163439", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1900.0, "ve": 4500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900468913/BANCO ESPEDITO.png"}, {"nome": "CADEIRA DE BALANÇO MACARRÃO AZUL", "cod": "163520", "cat": "CADEIRA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Vendido", "cu": 700.0, "ve": 2500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900471840/CADEIRA DE BALANÇO.png"}, {"nome": "GIBÃO - ESPEDITO SELEIRO", "cod": "163692", "cat": "ADORNO", "cl": "ACERVO DO CURADOR", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 15000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900475612/GIBÃO .png"}, {"nome": "CAPA DE ALMOFADA GRANDE  - ESPEDITO SELEIRO", "cod": "163644", "cat": "CAPA DE ALMOFADA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900481993/CAPA DE ALMOFADA .png"}, {"nome": "BOLSA DE VINHOS - ESPEDITO SELEIRO", "cod": "163645", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Não identificado", "cu": 520.0, "ve": 0.0, "img": ""}, {"nome": "CADEIRA ESPEDITO SELEIRO", "cod": "163916", "cat": "CADEIRA", "cl": "ACERVO DO CURADOR", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 10000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900490122/CADEIRA ESPEDITO SELEIRO .png"}, {"nome": "TOTENS SERGGIO MELO - MODELO 01", "cod": "163651", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 2300.0, "ve": 4600.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900494385/TOTENS SERGIO MELO.png"}, {"nome": "TOTENS SERGGIO MELO - MODELO 02", "cod": "163651", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 2300.0, "ve": 4600.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900496252/TOTENS SERGIO MELO.png"}, {"nome": "TOTENS SERGGIO MELO - MODELO 03", "cod": "163651", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 2300.0, "ve": 4600.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900498902/TOTENS SERGIO MELO.png"}, {"nome": "CADEIRA IMAGINÁRIA - ANDRÉ MENEZES", "cod": "163736", "cat": "CADEIRA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 7500.0, "ve": 15000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900501799/CADEIRA IMAGINARIA.png"}, {"nome": "BANCO ZEBRA MÉDIO - LENO", "cod": "163814", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1000.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900505198/BANCO ZEBRA .png"}, {"nome": "BANCO ZEBRA GRANDE - LENO", "cod": "163815", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1800.0, "ve": 4500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900509482/BANCO GRANDE.png"}, {"nome": "BORDADO BOA NOITE  - VANVAN ILHA DO FERRO", "cod": "163740", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 100.0, "ve": 200.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900530233/BORDADO .png"}, {"nome": "BANCO DE MADEIRA AZUL E VERMELHO - VANVAN", "cod": "163739", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 800.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900533770/BANCO 01 - VANVAN .png"}, {"nome": "BANCO DE MADEIRA AZUL E AMARELO - VANVAN", "cod": "163739", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 800.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900537677/BANCO 02.png"}, {"nome": "BANCO DE MADEIRA ESTRELA  - VANVAN", "cod": "163739", "cat": "BANCO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 800.0, "ve": 3500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900561449/BANCO ESTRELA.png"}, {"nome": "CADEIRA DE MADEIRA - VANVAN", "cod": "163738", "cat": "CADEIRA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 8000.0, "ve": 15000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900563782/CADEIRA VANVAn.png"}, {"nome": "BIOMBO VIDALNOX", "cod": "163757", "cat": "BIOMBO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 5600.0, "ve": 22000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900573403/BIOMBO.png"}, {"nome": "REDES DE TUCUN - OCA", "cod": "", "cat": "OUTROS", "cl": "GARIMPO DESCONEXO", "qtd": 2, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 0.0, "img": ""}, {"nome": "QUADRO AZUL - MESTRE GRACIANO", "cod": "163905", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1069.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2900584731/QUADRO AZUL.png"}, {"nome": "QUADRO MARROM - MESTRE GRACIANO", "cod": "163906", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1069.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902433484/QUADRO MARROM.png"}, {"nome": "QUADRO VERMELHO - MESTRE GRACIANO", "cod": "", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902449433/QUADRO VERMELHO.png"}, {"nome": "QUADRO COLORIDO - MESTRE GRACIANO", "cod": "163908", "cat": "QUADRO", "cl": "ACERVO DO CURADOR", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902482437/QUADRO COLORIDO MESTRE GRACIANO.png"}, {"nome": "GIBÃO - BOSCO LISBOA", "cod": "163692", "cat": "ESCULTURA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 3000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902495675/BOSCO LISBOA.png"}, {"nome": "XILOGRAVURA CACTO", "cod": "163909", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902499612/XILOGRAVURA.png"}, {"nome": "QUADRO HOJE TOU MI ACHANDO - ROXINHA", "cod": "163898", "cat": "QUADRO", "cl": "ACERVO DO CURADOR", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 8000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902505111/QUADRO 1 ROXINHA.png"}, {"nome": "QUADRO  QUADRO ELES ADIMIRAM AS MULHERES BRASILEIRAS ELAS TÃO PERPARADAS PRA O QUE DER E VINHER - ROXINHA", "cod": "163897", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 8000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902511060/quadro  2 roxinha.png"}, {"nome": "PRATO COM GALINHAS - TANCREDO ARTESÃO", "cod": "163880", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 55.0, "ve": 130.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902519896/PRATO COM GALINHAS.png"}, {"nome": "GALINHA DE BARRO -  TANCREDO ARTESÃO", "cod": "163884", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 45.0, "ve": 120.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902524289/VASO GALINHA .png"}, {"nome": "CUSCUZEIRA PAULISTA DE BARRO  -  TANCREDO ARTESÃO", "cod": "163882", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 45.0, "ve": 120.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902529049/CUSCUZEIRA BARRO.png"}, {"nome": "CABAÇA PEQUENA  - TANCREDO ARTESÃO", "cod": "163886", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 12, "arm": "Loja Desconexo", "st": "Disponível", "cu": 5.0, "ve": 20.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902535015/CABAÇA PEQUENA.png"}, {"nome": "CABAÇA BENGALA - TANCREDO ARTESÃO", "cod": "163887", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 5, "arm": "Loja Desconexo", "st": "Disponível", "cu": 25.0, "ve": 100.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902541569/CABAÇA BENGALA.png"}, {"nome": "JARRO DE BARRO - TANCREDO ARTESÃO", "cod": "163883", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 55.0, "ve": 110.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902549095/JARRO DE BARRO.png"}, {"nome": "COADOR MADEIRA - TANCREDO ARTESÃO", "cod": "163885", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 2, "arm": "Loja Desconexo", "st": "Disponível", "cu": 35.0, "ve": 100.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902558954/COADOR MADEIRA .png"}, {"nome": "GAIOLA TORRE - TANCREDO ARTESÃO", "cod": "163888", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 350.0, "ve": 890.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902565639/GAIOLA .png"}, {"nome": "QUADRO FOTOGRAFIA BELCHIOR", "cod": "163910", "cat": "QUADRO", "cl": "ACERVO DO CURADOR", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 12000.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902569795/FOTOGRAFIA BELCHIOR.png"}, {"nome": "ESCULTURA BOTA", "cod": "163911", "cat": "ESCULTURA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 250.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902579370/ESCULTURA BOTA.png"}, {"nome": "ESCULTURA MÃO AMARELA", "cod": "163912", "cat": "ESCULTURA", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 250.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902583632/ESCULTURA MÃO AMARELA.png"}, {"nome": "ORATÓRIO AZUL", "cod": "163913", "cat": "ADORNO", "cl": "ACERVO DO CURADOR", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 2800.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902588737/ORATORIO.png"}, {"nome": "BONECA ROUPA VERDE", "cod": "163914", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 150.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902597506/BONECA ROUPA VERDE.png"}, {"nome": "BONECA ROUPA CINZA", "cod": "163915", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 150.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902755126/BONECA ROUPA CINZA.png"}, {"nome": "JOGO AMERICADO DO CARIRI", "cod": "", "cat": "COMPLEMENTOS", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902834926/jogo americado cariri.png"}, {"nome": "ALMOFADAS COM CAPA DE RENDA BRANCA", "cod": "", "cat": "COMPLEMENTOS", "cl": "GARIMPO DESCONEXO", "qtd": 2, "arm": "Loja Desconexo", "st": "Disponível", "cu": 0.0, "ve": 500.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2902845047/ALMOFADAS CAPA DE RENDA.png"}, {"nome": "VASO TAPERA DAS ARTES | ACERVO SH26", "cod": "164064", "cat": "VASO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 1520.0, "ve": 3350.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903601494/vaso tapera das artes.png"}, {"nome": "BOTELHA VERDE  - TAPERA DAS ARTES SH 26", "cod": "164065", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 205.0, "ve": 415.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903610671/BOTELHA VERDE.png"}, {"nome": "BOTELHA AZUL - TAPERA DAS ARTES SH 26", "cod": "164066", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 205.0, "ve": 415.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903617149/BOTELHA VERDE.png"}, {"nome": "APITO PASSARINHO LARANJA E MARROM  - SH26", "cod": "164058", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 71.1, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903626799/APITO .png"}, {"nome": "APITO PASSARINHO MARROM", "cod": "164059", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 71.1, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903634617/APITO .png"}, {"nome": "APITO PASSARINHO AMARELO", "cod": "164060", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 71.1, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903637077/APITO .png"}, {"nome": "APITO PASSARINHO BRANCO", "cod": "164061", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 71.1, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903640141/APITO .png"}, {"nome": "APITO PASSARINHO VERMELHO", "cod": "164062", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 71.1, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903651083/APITO .png"}, {"nome": "APITO PASSARINHO AZUL", "cod": "164063", "cat": "ADORNO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Disponível", "cu": 71.1, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903654059/APITO .png"}, {"nome": "ALMOFADÃO DE RENDA DE BIRO - SH26", "cod": "164120", "cat": "ADORNO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2903903243/2605dab1-f751-47cd-a0ef-ec76d8b40565.jpg"}, {"nome": "LUMINÁRIA", "cod": "", "cat": "LUMINÁRIA", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905478041/LUMINARIA.jpg"}, {"nome": "VASO TRANSPARENTE ENCANTO TAMANHO G I SH25", "cod": "155135", "cat": "VASO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905482446/VASO.jpg"}, {"nome": "QUADRO PAREDE - 30 CM X 42 CM X 2 CM - CORTES DIAGONIAIS - SERIE DE 3", "cod": "140546", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Disponível", "cu": 1575.0, "ve": 3150.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905485358/QUADRO AMARELO.jpg"}, {"nome": "QUADRO PAREDE - 30 CM X 42 CM X 2 CM - CORTES DIAGONIAIS - SERIE DE 3", "cod": "140546", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Disponível", "cu": 1575.0, "ve": 3150.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905490109/QUADRO AZUL E BRANCO.png"}, {"nome": "QUADRO PAREDE - 30 CM X 42 CM X 2 CM - CORTES DIAGONIAIS - SERIE DE 3", "cod": "140546", "cat": "QUADRO", "cl": "GARIMPO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Disponível", "cu": 1575.0, "ve": 3150.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905493143/QUADRO AMAREO E CINZA.png"}, {"nome": "LIVRO - COMO CONVENCER ALGUÉM EM 90 SEGUNDOS", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905498559/LIVRO COMO CONVENCER ALGUEM.jpg"}, {"nome": "LIVRO - LUGAR DE POTÊNCIA", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905504372/LIVRO - LUGAR DE POTENCIA.jpg"}, {"nome": "LIVRO - UMA BREVE HISTÓRIA DO TEMPO", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905512116/UMA BREVE HISTORIA DO TEMPO.jpg"}, {"nome": "LIVRO - O NOVO PODER", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905520662/LIVRO O NOVO PODER.jpg"}, {"nome": "LIVRO - GERAÇÃO DE VALOR", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905527496/LIVRO GERAÇÃO DE VALOR.jpg"}, {"nome": "LIVRO - PIPELINE DE LIDERANÇA", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905533523/PIPELINE DE LIDERANÇA.jpg"}, {"nome": "LIVRO - COMO FAZER AMIGOS E INFLUENCIAR PESSOAS", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905541771/COMO FAZER AMIGOS E INFLUENCIAR PESSOAS.jpg"}, {"nome": "LIVRO - CUSTOMER SUCCESS", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "HUB NB", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905549968/LIVRO - CUSTOMER SUCESS.jpg"}, {"nome": "OBRA - FELIPE SANDENBERG (EXCLUSICO CDT)", "cod": "", "cat": "ESCULTURA", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905567514/OBRA CDT.jpg"}, {"nome": "QUADRO -  BORDADO", "cod": "", "cat": "ADORNO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905570545/QUADRO BORDADO.png"}, {"nome": "QUADRO", "cod": "", "cat": "QUADRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905574152/QUADRO -.jpg"}, {"nome": "QUADRO THE PYONGYANG TIMES", "cod": "", "cat": "QUADRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905576139/QUADRO THE PYONGYANG.jpg"}, {"nome": "LIVRO - NO RASTRO DE LAMPIÃO E MARIA BONITA  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905582941/LIVRO - NO RASTRO DE LAMPIÃO E MARIA BONITA.jpg"}, {"nome": "LIVRO - NO/ZE", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905585148/LIVRO NOZE.jpg"}, {"nome": "PRATO - PINTURA AZUL", "cod": "", "cat": "ADORNO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905587301/PRATO.jpg"}, {"nome": "ESCULTURA - PASSARO BARRO", "cod": "", "cat": "ESCULTURA", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905589532/ESCULTURA PASSARO BARRO.jpg"}, {"nome": "LIVRO - CONCRETO - NARCELIO GRUD  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905591888/LIVRO - CONCRETO - NARCELIO GRUD.jpg"}, {"nome": "LIVRO - CONCRETO - NARCELIO GRUD  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905597913/LIVRO - CONCRETO VOL2 - NARCELIO GRUD.jpg"}, {"nome": "LIVRO - PALEOVISÕES - HUGO JOSÉ  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905600060/LIVRO - PALEOVISÕES.jpg"}, {"nome": "LIVRO - METAMORFOSES E DISTÂNCIAS  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905602640/LIVRO - METAMORFOSES E DISTÂNCIAS.jpg"}, {"nome": "LIVRO- EU SOU SILVA - JOSÉ ANTONIO DA SILVA  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905609410/LIVRO- EU SOU SILVA - JOSÉ ANTONIO DA SILVA.jpg"}, {"nome": "LIVRO - TINA HAASE  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905639637/LIVRO - TINA HAASE.jpg"}, {"nome": "LIVRO - LA FEMME BATEAU - Sérvulo Esmeraldo  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905647910/LA FEMME BARDEAU.jpg"}, {"nome": "AMPULHETA", "cod": "", "cat": "ADORNO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905650637/AMPULHETA.jpg"}, {"nome": "CAMPAINHA DE MESA VINTAGE", "cod": "", "cat": "ADORNO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905655499/CAMPAINHA DE MESA.jpg"}, {"nome": "IGREJINHA - AMARELO E BRANCO", "cod": "", "cat": "ADORNO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905963313/igrejinha - amarelo e branco.jpg"}, {"nome": "LIVRO - COSTA ESMERALDA  (ITEM DE PESQUISA)", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905966976/LIVRO - COSTA ESMERALDA.jpg"}, {"nome": "IGREJA - PINTURA  BRANCO E VERMELHO", "cod": "", "cat": "ADORNO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905972748/IGREJA - BRANCO E VERMELHO.jpg"}, {"nome": "LIVRO - MIAMI BEACH", "cod": "", "cat": "LIVRO", "cl": "ACERVO DESCONEXO", "qtd": 1, "arm": "Loja Desconexo", "st": "Bloqueado", "cu": 0.0, "ve": 0.0, "img": "https://grupo-dnx.monday.com/protected_static/27280329/resources/2905982566/LIVRO MIAMI BEACH.jpg"}];
+var TODAY = '18/04/2026';
+document.getElementById('subDate').textContent = 'Garimpo Desconexo & Acervo do Curador · Atualizado em ' + TODAY;
+
+var CC = {ADORNO:'#7F77DD',ESCULTURA:'#D85A30',LIVRO:'#1D9E75',LUMINÁRIA:'#EF9F27',VASO:'#D4537E',COMPLEMENTOS:'#534AB7',BANCO:'#378ADD',CADEIRA:'#EF9F27',BAU:'#1D9E75',MALA:'#D4537E',QUADRO:'#D85A30',BIOMBO:'#534AB7',OUTROS:'#888780','CAPA DE ALMOFADA':'#ED93B1'};
+var PC = {ADORNO:'p-a',ESCULTURA:'p-q',LIVRO:'p-u',LUMINÁRIA:'p-c',VASO:'p-m',COMPLEMENTOS:'p-bio',BANCO:'p-b',CADEIRA:'p-c',BAU:'p-u',MALA:'p-m',QUADRO:'p-q',BIOMBO:'p-bio',OUTROS:'p-o','CAPA DE ALMOFADA':'p-cap'};
+var SC = {'Disponível':'#1D9E75','Vendido':'#378ADD','Bloqueado':'#E24B4A','Consignado':'#EF9F27','Não identificado':'#888780'};
+var SP = {'Disponível':'p-disp','Vendido':'p-vend','Bloqueado':'p-blo','Consignado':'p-nid','Não identificado':'p-o'};
+
+var pg = 1, perPage = 24, curView = 'grid';
+var chCat = null, chStt = null, chCls = null;
+
+function R(n){return Math.round(n);}
+function BRL(n){return n>0?'R$ '+R(n).toLocaleString('pt-BR'):'—';}
+function PCT(n){return R(n)+'%';}
+function mg(p){return p.ve>0&&p.cu>0?((p.ve-p.cu)/p.ve)*100:null;}
+function ini(nome){var p=nome.split(/[-|,]/)[0].trim().split(' ');return ((p[0]||'')[0]||'').toUpperCase()+((p[1]||'')[0]||'').toUpperCase();}
+
+function imgEl(p, size) {
+  var bg = CC[p.cat]||'#888';
+  var inits = ini(p.nome);
+  if(p.img) {
+    return '<img src="'+p.img+'" alt="'+p.nome.replace(/"/g,'&quot;')+'" loading="lazy" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:8px;display:block" '
+      +'onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+      +'<div style="display:none;width:'+size+'px;height:'+size+'px;border-radius:8px;background:#f1efe8;align-items:center;justify-content:center;font-size:'+Math.round(size/3)+'px;font-weight:700;color:'+bg+'60">'+inits+'</div>';
+  }
+  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:8px;background:#f1efe8;display:flex;align-items:center;justify-content:center;font-size:'+Math.round(size/3)+'px;font-weight:700;color:'+bg+'60">'+inits+'</div>';
+}
+
+function openLB(url, name) {
+  document.getElementById('lbImg').src = url;
+  document.getElementById('lbCap').textContent = name;
+  document.getElementById('lb').classList.add('on');
+}
+function closeLB(){document.getElementById('lb').classList.remove('on');}
+document.addEventListener('keydown', function(e){if(e.key==='Escape')closeLB();});
+
+function setView(v) {
+  curView = v; perPage = v==='grid' ? 24 : 15;
+  document.getElementById('tableView').style.display = v==='table'?'block':'none';
+  document.getElementById('gridView').style.display = v==='grid'?'block':'none';
+  document.getElementById('btnTable').classList.toggle('active', v==='table');
+  document.getElementById('btnGrid').classList.toggle('active', v==='grid');
+  go();
+}
+
+function filt() {
+  var q = document.getElementById('sP').value.toLowerCase();
+  var c = document.getElementById('sC').value;
+  var st = document.getElementById('sSt').value;
+  var arm = document.getElementById('sArm').value;
+  var cl = document.getElementById('sCl').value;
+  var s = document.getElementById('srt').value;
+  var r = PRODS.filter(function(p){
+    return (!q||p.nome.toLowerCase().includes(q)||p.cod.includes(q)) &&
+           (!c||p.cat===c) && (!st||p.st===st) && (!arm||p.arm===arm) && (!cl||p.cl===cl);
+  });
+  if(s==='margem') r.sort(function(a,b){return (mg(b)||0)-(mg(a)||0);});
+  else if(s==='venda') r.sort(function(a,b){return b.ve-a.ve;});
+  else if(s==='custo') r.sort(function(a,b){return b.cu-a.cu;});
+  else if(s==='qtd') r.sort(function(a,b){return b.qtd-a.qtd;});
+  else r.sort(function(a,b){return a.nome.localeCompare(b.nome,'pt-BR');});
+  return r;
+}
+
+function chips() {
+  var q=document.getElementById('sP').value, c=document.getElementById('sC').value, st=document.getElementById('sSt').value, arm=document.getElementById('sArm').value, cl=document.getElementById('sCl').value;
+  var items=[];
+  if(q) items.push({t:'Produto: '+q.substring(0,20), x:function(){document.getElementById('sP').value='';chips();go();}});
+  if(c) items.push({t:'Cat: '+c, x:function(){document.getElementById('sC').value='';chips();go();}});
+  if(st) items.push({t:'Status: '+st, x:function(){document.getElementById('sSt').value='';chips();go();}});
+  if(arm) items.push({t:'Armazém: '+arm, x:function(){document.getElementById('sArm').value='';chips();go();}});
+  if(cl) items.push({t:'Classif.: '+(cl==='GARIMPO DESCONEXO'?'Garimpo':cl==='ACERVO DO CURADOR'?'Acervo Curador':'Acervo Desc.'), x:function(){document.getElementById('sCl').value='';chips();go();}});
+  var el=document.getElementById('chips');
+  if(!items.length){el.innerHTML='';return;}
+  el._d=items;
+  el.innerHTML=items.map(function(_,i){
+    return '<span class="chip" onclick="rmChip('+i+')">'+items[i].t+' <svg viewBox="0 0 10 10" fill="none" style="width:10px;height:10px;flex-shrink:0"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>';
+  }).join('')+'<span class="chip chip-clr" onclick="clrAll()">&#10005; Limpar</span>';
+}
+function rmChip(i){document.getElementById('chips')._d[i].x();}
+function clrAll(){document.getElementById('sP').value='';document.getElementById('sC').value='';document.getElementById('sSt').value='';document.getElementById('sArm').value='';document.getElementById('sCl').value='';chips();go();}
+
+function drawKPI() {
+  var r=filt(), n=r.length, qtd=r.reduce(function(a,p){return a+p.qtd;},0);
+  var cu=r.filter(function(p){return p.cu>0;}).reduce(function(a,p){return a+p.cu*p.qtd;},0);
+  var ve=r.filter(function(p){return p.ve>0;}).reduce(function(a,p){return a+p.ve*p.qtd;},0);
+  var lu=ve-cu, m=ve>0?(lu/ve)*100:0;
+  var disp=r.filter(function(p){return p.st==='Disponível';}).length;
+  var vend=r.filter(function(p){return p.st==='Vendido';}).length;
+  var semVal=r.filter(function(p){return p.cu===0||p.ve===0;}).length;
+  document.getElementById('kg').innerHTML=
+    '<div class="kp"><div class="kl">SKUs</div><div class="kv">'+n+'</div><div class="ks">'+qtd+' unidades totais</div></div>'+
+    '<div class="kp"><div class="kl">Disponíveis</div><div class="kv" style="color:#1D9E75">'+disp+'</div><div class="ks">'+vend+' vendido(s)</div></div>'+
+    '<div class="kp ka"><div class="kl">Valor investido</div><div class="kv" style="font-size:16px">'+BRL(cu)+'</div><div class="ks">custo total</div></div>'+
+    '<div class="kp ka"><div class="kl">Receita potencial</div><div class="kv" style="font-size:16px">'+BRL(ve)+'</div><div class="ks">venda total</div></div>'+
+    '<div class="kp"><div class="kl">Lucro bruto est.</div><div class="kv" style="font-size:16px;color:#3B6D11">'+BRL(lu)+'</div><div class="ks" style="color:#3B6D11">margem '+PCT(m)+'</div></div>'+
+    '<div class="kp"><div class="kl">Sem valor</div><div class="kv" style="color:#BA7517">'+semVal+'</div><div class="ks">custo ou venda zerado</div></div>';
+}
+
+function drawCharts() {
+  var r=filt();
+  var cats=[...new Set(PRODS.map(function(p){return p.cat;}))].filter(function(c){return c;});
+  var catV=cats.map(function(c){return r.filter(function(p){return p.cat===c;}).reduce(function(a,p){return a+p.ve*p.qtd;},0);});
+  var catC=cats.map(function(c){return CC[c]||'#888';});
+  document.getElementById('catL').innerHTML=cats.map(function(c,i){return '<span><span class="sq" style="background:'+catC[i]+'"></span>'+c+'</span>';}).join('');
+  if(chCat) chCat.destroy();
+  chCat = new Chart(document.getElementById('cCat'), {
+    type:'bar',
+    data:{labels:cats,datasets:[{label:'Venda est.',data:catV,backgroundColor:catC.map(function(c){return c+'cc';}),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return BRL(ctx.raw);}}}},
+      scales:{x:{ticks:{color:'#888780',font:{size:9},maxRotation:40},grid:{color:'rgba(0,0,0,.04)'}},
+              y:{ticks:{color:'#888780',font:{size:10},callback:function(v){return 'R$'+R(v/1000)+'k';}},grid:{color:'rgba(0,0,0,.04)'}}}}
+  });
+  var stts=['Disponível','Vendido','Bloqueado','Consignado','Não identificado'];
+  var sttD=stts.map(function(s){return r.filter(function(p){return p.st===s;}).reduce(function(a,p){return a+p.qtd;},0);});
+  var sttC=stts.map(function(s){return SC[s];});
+  document.getElementById('sttL').innerHTML=stts.filter(function(_,i){return sttD[i]>0;}).map(function(s){
+    var i=stts.indexOf(s);return '<span><span class="sq" style="background:'+sttC[i]+'"></span>'+s+' ('+sttD[i]+')</span>';
+  }).join('');
+  if(chStt) chStt.destroy();
+  chStt = new Chart(document.getElementById('cStt'), {
+    type:'doughnut',
+    data:{labels:stts,datasets:[{data:sttD,backgroundColor:sttC.map(function(c){return c+'cc';}),borderWidth:3,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.label+': '+ctx.raw+' un.';}}}}}
+  });
+  var clss=[...new Set(r.map(function(p){return p.cl;}))].filter(function(c){return c;});
+  var clsD=clss.map(function(c){return r.filter(function(p){return p.cl===c;}).reduce(function(a,p){return a+p.qtd;},0);});
+  var clsC=['#378ADD','#EF9F27','#7F77DD','#1D9E75'];
+  document.getElementById('clsL').innerHTML=clss.map(function(c,i){return '<span><span class="sq" style="background:'+(clsC[i]||'#888')+'"></span>'+c+' ('+clsD[i]+')</span>';}).join('');
+  if(chCls) chCls.destroy();
+  chCls = new Chart(document.getElementById('cCls'), {
+    type:'doughnut',
+    data:{labels:clss,datasets:[{data:clsD,backgroundColor:clss.map(function(_,i){return (clsC[i]||'#888')+'cc';}),borderWidth:3,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.label+': '+ctx.raw+' un.';}}}}}
+  });
+}
+
+function drawContent() {
+  var r=filt(), tot=r.length, pgs=Math.max(1,Math.ceil(tot/perPage));
+  if(pg>pgs) pg=pgs;
+  var sl=r.slice((pg-1)*perPage, pg*perPage);
+  document.getElementById('cnt').textContent = tot+' produto'+(tot!==1?'s':'')+' encontrado'+(tot!==1?'s':'');
+  document.getElementById('pgL').textContent = pg+' / '+pgs;
+  document.getElementById('pgI').textContent = 'Exibindo '+Math.min((pg-1)*perPage+1,tot)+'–'+Math.min(pg*perPage,tot)+' de '+tot;
+  document.getElementById('pB').disabled = pg<=1;
+  document.getElementById('nB').disabled = pg>=pgs;
+  if(curView==='table') drawTable(sl);
+  else drawGrid(sl);
+}
+
+function drawTable(sl) {
+  var tb=document.getElementById('tb');
+  if(!sl.length){tb.innerHTML='<tr><td colspan="10" class="emp">Nenhum produto encontrado</td></tr>';return;}
+  tb.innerHTML = sl.map(function(p) {
+    var idx=PRODS.indexOf(p), m=mg(p);
+    var mC=m===null?'#888780':m>=60?'#3B6D11':m>=40?'#854F0B':'#A32D2D';
+    var bC=m===null?'#d3d1c7':m>=60?'#639922':m>=40?'#EF9F27':'#E24B4A';
+    var bW=Math.min(100,R(m||0));
+    var sn=p.nome.length>30?p.nome.substring(0,30)+'…':p.nome;
+    var imgWrap = p.img
+      ? '<div class="tcell-img" onclick="openLB(\''+p.img.replace(/'/g,"\\'")+'\',' + JSON.stringify(p.nome) + ')">'+imgEl(p,44)+'</div>'
+      : '<div class="tcell-img" style="cursor:default">'+imgEl(p,44)+'</div>';
+    return '<tr class="dr">'
+      +'<td>'+imgWrap+'</td>'
+      +'<td style="font-weight:600" title="'+p.nome+'">'+sn+'<div style="font-size:11px;color:#888780;margin-top:1px;font-weight:400">'+(p.cod||'—')+'</div></td>'
+      +'<td><span class="pi '+(PC[p.cat]||'p-o')+'">'+p.cat+'</span></td>'
+      +'<td style="font-size:11px;color:'+(p.cl==='ACERVO DO CURADOR'?'#0C447C':'#5f5e5a')+';font-weight:'+(p.cl==='ACERVO DO CURADOR'?600:400)+'">'+(p.cl==='ACERVO DO CURADOR'?'Acervo':'Garimpo')+'</td>'
+      +'<td style="text-align:center;font-weight:600">'+p.qtd+'</td>'
+      +'<td style="text-align:right">'+BRL(p.cu)+'</td>'
+      +'<td style="text-align:right;font-weight:600">'+BRL(p.ve)+'</td>'
+      +'<td><div class="bw"><div class="bb"><div class="bf" style="width:'+bW+'%;background:'+bC+'"></div></div><span style="font-size:12px;font-weight:600;color:'+mC+';min-width:30px;text-align:right">'+(m===null?'—':PCT(m))+'</span></div></td>'
+      +'<td><span class="pi '+(SP[p.st]||'p-o')+'">'+p.st+'</span></td>'
+      +'<td style="white-space:nowrap">'
+      +'<button class="ib" onclick="editP('+idx+')" title="Editar"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-9 9H2v-3L11 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>'
+      +'<button class="ib dd" onclick="delP('+idx+')" title="Excluir"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3h4v2M6 8v5M10 8v5M4 5l1 9h6l1-9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+      +'</td></tr>';
+  }).join('');
+}
+
+function drawGrid(sl) {
+  var gb=document.getElementById('gridBody');
+  if(!sl.length){gb.innerHTML='<div class="emp" style="grid-column:1/-1">Nenhum produto encontrado</div>';return;}
+  gb.innerHTML = sl.map(function(p) {
+    var idx=PRODS.indexOf(p), m=mg(p);
+    var mC=m===null?'#888780':m>=60?'#3B6D11':m>=40?'#854F0B':'#A32D2D';
+    var bg=CC[p.cat]||'#888';
+    var inits=ini(p.nome);
+    var imgContent;
+    if(p.img) {
+      imgContent = '<img src="'+p.img+'" alt="'+p.nome.replace(/"/g,'&quot;')+'" loading="lazy" '
+        +'style="width:100%;height:100%;object-fit:cover;display:block" '
+        +'onclick="openLB(\''+p.img.replace(/'/g,"\\'")+'\','+JSON.stringify(p.nome)+')" '
+        +'onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+        +'<div class="fb" style="display:none"><div class="fb-txt" style="color:'+bg+'">'+inits+'</div></div>';
+    } else {
+      imgContent = '<div class="fb"><div class="fb-txt" style="color:'+bg+'">'+inits+'</div></div>';
+    }
+    var shortName = p.nome.length>45 ? p.nome.substring(0,45)+'…' : p.nome;
+    var cardBorder = p.cl==='ACERVO DO CURADOR' ? 'border-left:3px solid #378ADD' : p.cl==='ACERVO DESCONEXO' ? 'border-left:3px solid #1D9E75' : '';
+    return '<div class="card" style="'+cardBorder+'">'
+      +'<div class="card-img">'
+      +imgContent
+      +'<span class="sbadge"><span class="pi '+(SP[p.st]||'p-o')+'" style="font-size:10px;padding:2px 7px">'+p.st+'</span></span>'
+      +'<span class="cl-badge '+(p.cl==='ACERVO DO CURADOR'?'cl-acervo':'cl-garimpo')+'">'+(p.cl==='ACERVO DO CURADOR'?'✦ Acervo':'Garimpo')+'</span>'
+      +'</div>'
+      +'<div class="card-body">'
+      +'<div class="card-name" title="'+p.nome+'">'+shortName+'</div>'
+      +'<div class="card-meta">'+(p.cod||'—')+'<span class="pi '+(PC[p.cat]||'p-o')+'" style="font-size:10px;padding:2px 7px">'+p.cat+'</span></div>'
+      +'<div class="card-row">'
+      +'<span class="card-price">'+BRL(p.ve)+'</span>'
+      +'<span class="card-mg" style="color:'+mC+'">'+(m===null?'sem valor':PCT(m)+' mg')+'</span>'
+      +'</div>'
+      +'<div class="card-acts">'
+      +'<button onclick="editP('+idx+')">Editar</button>'
+      +'<button class="del" onclick="delP('+idx+')">Excluir</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function go(){pg=1;drawKPI();drawCharts();drawContent();}
+function pgC(d){pg+=d;drawContent();}
+
+function openModal(idx) {
+  idx = idx===undefined ? -1 : idx;
+  document.getElementById('fIx').value=idx;
+  if(idx>=0) {
+    var p=PRODS[idx];
+    document.getElementById('mT').textContent='Editar produto';
+    document.getElementById('fN').value=p.nome;
+    document.getElementById('fCo').value=p.cod;
+    document.getElementById('fCt').value=p.cat;
+    document.getElementById('fQ').value=p.qtd;
+    document.getElementById('fAr').value=p.arm||'Loja Desconexo';
+    document.getElementById('fSt').value=p.st;
+    document.getElementById('fCu').value=p.cu;
+    document.getElementById('fVe').value=p.ve;
+    document.getElementById('fCl').value=p.cl;
+    document.getElementById('fImg').value=p.img||'';
+  } else {
+    document.getElementById('mT').textContent='Novo produto';
+    ['fN','fCo','fCu','fVe','fImg'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('fQ').value=1;
+    document.getElementById('fSt').value='Disponível';
+    document.getElementById('fAr').value='Loja Desconexo';
+    document.getElementById('fCl').value='GARIMPO DESCONEXO';
+  }
+  document.getElementById('ov').classList.add('on');
+  setTimeout(function(){document.getElementById('fN').focus();},50);
+}
+function editP(i){openModal(i);}
+function closeM(){document.getElementById('ov').classList.remove('on');}
+function save() {
+  var idx=parseInt(document.getElementById('fIx').value);
+  var nome=document.getElementById('fN').value.trim();
+  if(!nome){document.getElementById('fN').style.borderColor='#E24B4A';document.getElementById('fN').focus();return;}
+  document.getElementById('fN').style.borderColor='';
+  var p={
+    nome:nome, cod:document.getElementById('fCo').value.trim(),
+    cat:document.getElementById('fCt').value, cl:document.getElementById('fCl').value,
+    qtd:parseInt(document.getElementById('fQ').value)||0,
+    arm:document.getElementById('fAr').value, st:document.getElementById('fSt').value,
+    cu:parseFloat(document.getElementById('fCu').value)||0,
+    ve:parseFloat(document.getElementById('fVe').value)||0,
+    img:document.getElementById('fImg').value.trim()
+  };
+  if(idx>=0) PRODS[idx]=p; else PRODS.push(p);
+  closeM(); ref();
+}
+function delP(i){if(confirm('Excluir "'+PRODS[i].nome+'"?')){PRODS.splice(i,1);ref();}}
+function exportCSV() {
+  var h=['Nome','Código','Categoria','Classificação','Quantidade','Armazém','Status','Custo unit.','Venda unit.','Margem %'];
+  var rows=filt().map(function(p){var m=mg(p);return['"'+p.nome+'"',p.cod,p.cat,p.cl,p.qtd,p.arm,p.st,p.cu,p.ve,m!==null?R(m):''];});
+  var csv=[h.join(',')].concat(rows.map(function(r){return r.join(',');})).join('\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='adornos_desconexo.csv'; a.click();
+}
+document.getElementById('ov').addEventListener('click',function(e){if(e.target===e.currentTarget)closeM();});
+function ref(){chips();drawKPI();drawCharts();drawContent();}
+setView('grid');
+</script>
+</body>
+</html>
